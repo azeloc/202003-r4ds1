@@ -591,7 +591,8 @@ E se quiséssemos utilizar as 3 colunas de atores?
 
 ```{r}
 imdb_atores <- imdb %>% 
-  gather(posicao, ator, ator_1, ator_2, ator_3) %>% 
+  gather(posicao, ator,
+         ator_1, ator_2, ator_3) 
 View(imdb_atores)
 ```
 
@@ -601,6 +602,58 @@ Repita a análise anterior, utilizando agora todas as colunas de atores, e veja 
 
 ```{r}
 
+# Análise 1
+
+imdb %>% 
+  filter(str_detect(generos, "Comedy")) %>% 
+  count(ator_1) %>% 
+  arrange(desc(n)) %>% 
+  top_n(10, n) %>% 
+  ggplot(aes(x = ator_1, y = n)) + 
+  geom_col() + 
+  coord_flip()
+
+imdb_atores %>% 
+  filter(str_detect(generos, "Comedy")) %>% 
+  count(ator) %>% 
+  arrange(desc(n)) %>% 
+  top_n(10, n) %>% 
+  ggplot(aes(x = ator, y = n)) + 
+  geom_col() + 
+  coord_flip()
+```
+
+```{r}
+# Análise 2
+
+a_c_m_f <- imdb_atores %>% 
+  count(ator) %>% 
+  arrange(desc(n)) %>% 
+  top_n(10, n)
+
+imdb_atores %>% 
+  filter(ator %in% a_c_m_f$ator) %>% 
+  ggplot(aes(x = orcamento)) +
+  geom_histogram(binwidth = 100*10^6)
+
+imdb_atores %>% 
+  filter(ator %in% a_c_m_f$ator) %>% 
+  ggplot(aes(x = lucro)) +
+  geom_histogram(binwidth = 50*10^6)
+
+
+```
+
+```{r}
+
+# Análise 3
+
+imdb_atores %>% 
+  filter(ator == "Will Ferrell") %>% 
+  ggplot(aes(x = ano, y = nota_imdb)) +
+  geom_line() +
+  geom_smooth(se = FALSE, color = 'red',
+              method = 'gam')
 ```
 
 # Misc de ggplot2
@@ -649,7 +702,7 @@ imdb %>%
   scale_y_continuous(label = scales::dollar_format()) +
   scale_x_continuous(label = scales::dollar_format()) +
   theme_minimal() +
-  ggtitle("Arrecadação vs Orçamento (em milhões de dólares)") +
+  ggtitle("Arrecadação vs Orçamento (em milhões de dólares)", subtitle = "Filmes de grande orçamento dão bastante prejuízo.") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
