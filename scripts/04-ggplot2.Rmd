@@ -510,6 +510,30 @@ Repita as análises acima, agora para os atores (vamos começar utilizando apena
 1. Selecione os atores com mais filmes. Visualize quem são os atores e o número de filmes que eles fizeram. Você pode ou não fazer a análise para um gênero.
 
 ```{r}
+library(tidyverse)
+
+imdb <- readRDS("../dados/imdb.rds")
+
+imdb %>% 
+  count(ator_1) %>% 
+  arrange(desc(n)) %>% 
+  top_n(10, n)
+
+imdb %>% 
+  filter(str_detect(generos, "Comedy")) %>% 
+  count(ator_1) %>% 
+  arrange(desc(n)) %>% 
+  top_n(10, n)
+
+imdb %>% 
+  filter(str_detect(generos, "Comedy"),
+         str_detect(generos, "Action")) %>% 
+  count(ator_1) %>% 
+  arrange(desc(n)) %>% 
+  top_n(10, n) %>% 
+  ggplot(aes(x = ator_1, y = n)) + 
+  geom_col()
+
 
 ```
 
@@ -519,16 +543,49 @@ desses atores.
 
 ```{r}
 
-```
+imdb <- imdb %>% 
+  mutate(
+    lucro = receita-orcamento
+  )
 
+a_c_m_f <- imdb %>% 
+  count(ator_1) %>% 
+  arrange(desc(n)) %>% 
+  top_n(10, n)
+
+imdb %>% 
+  filter(ator_1 %in% a_c_m_f$ator_1) %>% 
+  ggplot(aes(x = orcamento)) +
+  geom_histogram(binwidth = 100*10^6)
+
+imdb %>% 
+  filter(ator_1 %in% a_c_m_f$ator_1) %>% 
+  ggplot(aes(x = lucro)) +
+  geom_histogram(binwidth = 50*10^6)
+
+imdb %>% 
+  group_by(ator_1) %>% 
+  mutate(
+    numero_de_filmes = n()
+  ) %>% 
+  filter(numero_de_filmes > 
+    sort(unique(variavel$numero_de_filmes),
+         decreasing = TRUE)[8])
+
+
+```
 
 3. Selecione um dos atores e estude a nota de seus filmes no IMDB ao longo do tempo.
 
 ```{r}
 
+imdb %>% 
+  filter(ator_1 == "Will Smith") %>% 
+  ggplot(aes(x = ano, y = nota_imdb)) +
+  geom_line() +
+  geom_smooth(se = FALSE, color = 'red',
+              method = 'gam')
 ```
-
-
 
 E se quiséssemos utilizar as 3 colunas de atores?
 
