@@ -761,13 +761,35 @@ imdb %>%
 
 ```{r}
 
+imdb %>% 
+  filter(
+    ano == 2016
+  ) %>% 
+  top_n(10, receita) %>%
+  mutate(titulo = fct_reorder(titulo, receita)) %>% 
+  ggplot(aes(x = titulo, y = receita)) +
+  geom_col() +
+  coord_flip()
+
 ```
 
 
 2. Quantos filmes "são feitos por ano"?
 
 ```{r}
+imdb %>% 
+  ggplot(aes(x = ano)) + 
+  geom_bar()
 
+imdb %>% 
+  count(ano) %>% 
+  ggplot(aes(x = ano, y = n)) + 
+  geom_bar(stat = 'identity')
+
+imdb %>% 
+  count(ano) %>% 
+  ggplot(aes(x = ano, y = n)) + 
+  geom_col()
 ```
 
 
