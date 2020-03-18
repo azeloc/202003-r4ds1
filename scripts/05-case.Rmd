@@ -13,10 +13,16 @@ editor_options:
 library(flexdashboard)
 library(tidyverse)
 imdb <- read_rds("../dados/imdb.rds")
+
+imdb_analise <- imdb %>% 
+  mutate(
+    lucro = receita-orcamento,
+    retorno = lucro/orcamento
+  )
 ```
 
 Visão geral
-======================================================================
+========================================================================
 
 Row {data-height=110}
 ----------------------------------------------------------------------
@@ -26,11 +32,32 @@ Row {data-height=110}
 O estúdio de filmes FilmR precisa escolher um(a) diretor(a) e um(a) protagonista para o seu próximo filme. Para isso ele conduziu uma análise exploratória em uma base de dados com diversas informações de quase 4 mil filmes lançados nos Estados Unidos desde 1916. O objetivo da FilmR é identificar os diretores e atores que trariam o maior retorno financeiro para a produtora. 
 
 Row
------------------------------------------------------------------------
+---
 
 ### Filmes
 
 ```{r}
+
+imdb_analise %>%
+  top_n(10, retorno) %>%
+  mutate(
+    titulo = str_wrap(titulo, 15),
+    titulo = fct_reorder(titulo, retorno)) %>%
+  ggplot(aes(x = titulo, y = retorno)) +
+  geom_col() +
+  coord_flip() +
+  theme_bw(20) +
+  labs(x = "Título", y = "Retorno financeiro")
+
+# library(knitr)
+# 
+# imdb_analise %>%
+#   top_n(10, retorno) %>%
+#   mutate(
+#     titulo = str_wrap(titulo, 15),
+#     titulo = fct_reorder(titulo, retorno)) %>%
+#   select(titulo, retorno) %>% 
+#   kable()
 
 ```
 
