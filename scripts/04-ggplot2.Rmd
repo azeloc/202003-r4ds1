@@ -12,7 +12,6 @@ output: html_document
 
 - Tenta responder a pergunta: o que é um gráfico estatístico?
 
-
 > Um gráfico estatístico é uma representação visual dos dados que utiliza os atributos estéticos (posição, cor, forma, tamanho, ...) de formas geométricas (pontos, linhas, barras, ...).
 
 - Com base nessa definição, Hadley desenvolveu a gramática dos gráficos em camadas (ou *layered grammar of graphics*): cada elemento do gráfico pode ser representado por uma camada e um gráfico seria a sobreposição dessas camadas.
@@ -20,7 +19,6 @@ output: html_document
 ```{r}
 knitr::include_graphics("img/layers.png")
 ```
-
 
 # Pacotes
 
@@ -33,7 +31,8 @@ library(ggplot2)
 
 ```{r}
 imdb <- read_rds("../dados/imdb.rds")
-imdb <- imdb %>% mutate(lucro = receita - orcamento)
+imdb <- imdb %>% 
+  mutate(lucro = receita - orcamento)
 ```
 
 > Pergunta: será que filmes com maior orçamento tendem a arrecadar mais?
@@ -45,13 +44,20 @@ ggplot(imdb) +
   geom_point(mapping = aes(x = orcamento, y = receita))
 ```
 
+```{r}
+ggplot(imdb) +
+  geom_point(mapping = aes(x = orcamento, y = receita))
+```
+
+
 Vamos acrescentar a reta y = x para visualizar a quantidade de filmes que não se pagaram.
 (Também pintamos as bolinhas de roxo)
 
 ```{r}
 imdb %>%
   ggplot() +
-  geom_point(mapping = aes(x = orcamento, y = receita), colour = "purple") +
+  geom_point(mapping = aes(x = orcamento, y = receita),
+             colour = "red") +
   geom_abline(intercept = 0, slope = 1, color = "red")
 ```
 
@@ -59,9 +65,9 @@ Também podemos usar a cor dos pontos para visualizar os filmes que não se paga
 
 ```{r}
 imdb %>%
-  mutate(
-    lucro = ifelse(lucro <= 0, "Não", "Sim")
-  ) %>%
+#  mutate(
+#    lucro = ifelse(lucro <= 0, "Não", "Sim")
+#  ) %>%
   ggplot() +
   geom_point(mapping = aes(x = orcamento, y = receita, color = lucro))
 
@@ -96,7 +102,9 @@ imdb %>%
   labs(x = "Orçamento", y = "Arrecadação", color = "Houve lucro?") +
   scale_y_continuous(label = scales::dollar_format()) +
   scale_x_continuous(label = scales::dollar_format()) +
-  scale_color_manual(values = c("red", "green"), labels = c("N", "S"))
+  scale_color_manual(
+    values = c("red", "green"),
+    labels = c("N", "S"))
 ```
 
 Também podemos colocar as variáveis na escala de milhões.
@@ -127,12 +135,20 @@ imdb %>%
 1. Crie um gráfico de dispersão da nota do imdb pelo orçamento.
 
 ```{r}
-
+imdb %>% 
+  ggplot() +
+  geom_point(aes(x = orcamento, y = nota_imdb))
 ```
 
 2. Pinte todos os pontos do gráfico de azul.
 
 ```{r}
+
+imdb %>% 
+  mutate(cor_graf = "blue") %>% 
+  ggplot() +
+  geom_point(aes(x = orcamento, y = nota_imdb, color = cor_graf)) +
+  scale_color_manual(values = "blue")
 
 ```
 
@@ -140,9 +156,17 @@ imdb %>%
 
 ```{r}
 
+imdb %>% 
+  filter(classificacao == "Livre") %>% 
+  ggplot() +
+  geom_point(aes(x = orcamento, y = nota_imdb))
+
+imdb %>% 
+  filter(classificacao == "A partir de 13 anos") %>% 
+  ggplot() +
+  geom_point(aes(x = orcamento, y = nota_imdb))
+
 ```
-
-
 
 
 Podemos usar `facets` para fazer um gráfico para cada nível de uma variável.
@@ -164,7 +188,7 @@ imdb %>%
   mutate(ano_class = paste(classificacao, ano_cat)) %>% 
   ggplot() +
   geom_point(aes(x = orcamento, y = nota_imdb, color = ano_class)) +
-  facet_grid(ano_cat ~ classificacao)
+  facet_wrap(ano_cat ~ classificacao)
 ```
 
 
@@ -302,7 +326,7 @@ imdb %>%
   filter(n() >= 15) %>%
   ungroup() %>% 
   mutate(
-    diretor = fct_reorder(diretor, lucro, .fun = max, na.rm = TRUE)
+    diretor = fct_reorder(diretor, lucro, .fun = min, na.rm = TRUE)
   ) %>% 
   ggplot() +
   geom_boxplot(aes(x = diretor, y = lucro, fill = diretor)) +
@@ -331,11 +355,62 @@ imdb %>%
   )
 ```
 
+# Exemplo rotulo dados
+
+```{r}
+imdb %>% 
+  count(diretor) %>% 
+  arrange(desc(n)) %>% 
+  filter(!is.na(diretor)) %>% 
+  top_n(10, n) %>%
+  mutate(
+    diretor = fct_reorder(diretor, n)
+  ) %>% 
+  ggplot(aes(x = diretor, y = n, label = n)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) + geom_label(
+    position = position_stack(vjust = 1.1), #position_stack(vjust = .5)
+    colour = "yellow",
+    fill = "purple",
+    fontface = "bold",
+    label.size = 0
+  )
+```
+
+# Group
+
+```{r}
+imdb %>% 
+  filter(!is.na(diretor)) %>%
+  group_by(diretor) %>% 
+  filter(n() >= 15) %>%
+  ungroup()
+
+imdb %>% 
+    filter(!is.na(diretor)) %>% 
+    group_by(diretor) %>% 
+    mutate(
+      numero_de_filmes_na_base_do_diretor = n()
+    ) %>% 
+    ungroup() %>% 
+    filter(numero_de_filmes_na_base_do_diretor >= 15)
+```
+
+
 > Exercício
 
 1. Refaça o último gráfico utilizando a agora a variável `orçamento` como resposta.
 
 ```{r}
+
+imdb %>% 
+  filter(diretor == "Steven Spielberg") %>%
+  ggplot() +
+  geom_histogram(
+    aes(x = orcamento), 
+    binwidth = 50000000,
+    color = "white"
+  )
 
 ```
 
@@ -344,6 +419,21 @@ imdb %>%
 
 ```{r}
 
+imdb %>% 
+  filter(str_detect(generos, "Animation"),
+         !is.na(diretor)) %>%
+  count(diretor) %>% 
+  top_n(10, n) %>% 
+  mutate(diretor = fct_reorder(diretor, -n)) %>% 
+  ggplot() +
+  geom_bar(
+    aes(x = diretor, y = n), 
+    stat = 'identity',
+    color = "white",
+    fill = 'red'
+  ) +
+  coord_flip()
+
 ```
 
 
@@ -351,8 +441,14 @@ imdb %>%
 
 ```{r}
 
-```
+imdb %>% 
+  group_by(diretor) %>% 
+  filter(n() > 15) %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(x = lucro)) +
+  facet_wrap(~diretor)
 
+```
 
 
 > Pergunta: qual o comportamento das notas dos filmes do Spielberg no IMDB ao longo do tempo?
@@ -362,8 +458,9 @@ Vamos fazer um gráfico de linhas das notas pelo ano.
 ```{r}
 imdb %>% 
   filter(diretor == "Steven Spielberg") %>% 
-  ggplot() +
-  geom_line(aes(x = ano, y = nota_imdb))
+  ggplot(aes(x = ano, y = nota_imdb)) +
+  geom_line() +
+  geom_point()
 ```
 
 Vamos agregar os dados para termos apenas uma medida por ano.
@@ -387,7 +484,7 @@ imdb %>%
   ggplot() +
   geom_line(aes(x = ano, y = nota_media), alpha = 0.1) +
   geom_point(aes(x = ano, y = nota_media), alpha = 0.1) +
-  geom_text(aes(x = ano, y = nota_media , label = nota_media))
+  geom_label(aes(x = ano, y = nota_media , label = nota_media))
   
 ```
 
@@ -398,12 +495,13 @@ imdb %>%
   filter(diretor == "Steven Spielberg") %>%
   group_by(ano) %>% 
   summarise(nota_media = mean(nota_imdb, na.rm = TRUE)) %>% 
-  ggplot(aes(x = ano, y = nota_media)) +
+  ggplot(aes(x = ano, y = nota_media, label = nota_media)) +
   geom_point(alpha = 0.1) +
-  geom_line(alpha = 0.1) +
-  geom_text(aes(label = nota_media))
+  geom_bar(alpha = 0.1, stat = 'identity') +
+  geom_line() +
+  geom_point() +
+  geom_text()
 ```
-
 
 > Exercícios
 
@@ -447,7 +545,6 @@ Repita a análise anterior, utilizando agora todas as colunas de atores, e veja 
 ```{r}
 
 ```
-
 
 # Misc de ggplot2
 
