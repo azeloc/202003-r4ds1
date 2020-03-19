@@ -41,7 +41,7 @@ Row
 imdb_analise %>%
   top_n(10, retorno) %>%
   mutate(
-    titulo = str_wrap(titulo, 15),
+    #titulo = str_wrap(titulo, 15),
     titulo = fct_reorder(titulo, retorno)) %>%
   ggplot(aes(x = titulo, y = retorno)) +
   geom_col() +
@@ -61,15 +61,51 @@ imdb_analise %>%
 
 ```
 
-### # Diretores
+### Diretores
 
 ```{r}
+
+imdb_analise %>%
+  group_by(diretor) %>% 
+  summarise(
+    retorno_medio = mean(retorno),
+    numero_de_filmes = n()
+  ) %>% 
+  filter(numero_de_filmes > 3) %>% 
+  top_n(10, retorno_medio) %>%
+  mutate(
+    #titulo = str_wrap(titulo, 15),
+    diretor = fct_reorder(diretor, retorno_medio)) %>%
+  ggplot(aes(x = diretor, y = retorno_medio)) +
+  geom_col() +
+  coord_flip() +
+  theme_bw(20) +
+  labs(x = "Diretor", y = "Retorno financeiro")
 
 ```
 
-### # Atores
+### Atores
 
 ```{r}
+
+imdb_analise %>% 
+  gather(importancia, ator, ator_1, ator_2, ator_3) %>% 
+  group_by(ator) %>% 
+  summarise(
+    retorno_medio = mean(retorno),
+    numero_de_filmes = n()
+  ) %>% 
+  filter(numero_de_filmes > 5) %>% 
+  top_n(10, retorno_medio) %>% 
+  mutate(
+    ator = fct_reorder(ator, retorno_medio)
+  ) %>% 
+  ggplot(aes(x = ator, y = retorno_medio)) +
+  geom_col() +
+  coord_flip() +
+  theme_bw(20) +
+  labs(x = "Retorno Financeiro",
+       y = "Ator")
 
 ```
 
