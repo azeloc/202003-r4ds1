@@ -200,8 +200,24 @@ Sabemos que o estúdio quer contratar um(a) diretor(a) experiente, para ter meno
 
 ```{r}
 
-#graficos de barras
+# graficos de barras
 # grafico de diretor com mais filmes
+
+imdb_analise %>% 
+  group_by(diretor) %>% 
+  summarise(
+    nota_media = mean(nota_imdb),
+    numero_de_filmes = n()
+  ) %>% 
+  top_n(10, numero_de_filmes) %>% 
+  ungroup() %>% 
+  mutate(
+    diretor = fct_reorder(diretor, numero_de_filmes)
+  ) %>% 
+  ggplot(aes(x = diretor, y = numero_de_filmes)) + 
+  geom_col() +
+  theme_bw(20) +
+  coord_flip()
 
 ```
 
@@ -215,7 +231,21 @@ Column {.tabset}
 # geom_point
 # diretores com maiores médias de nota do imdb
 
-```
+imdb_analise %>% 
+  group_by(diretor) %>% 
+  summarise(
+    nota_media = mean(nota_imdb),
+    numero_de_filmes = n()
+  ) %>% 
+  filter(numero_de_filmes > 3) %>% 
+  top_n(10, nota_media) %>% 
+  mutate(diretor = fct_reorder(diretor, nota_media)) %>% 
+  ggplot(aes(x = diretor, y = nota_media)) +
+  geom_point() +
+  theme_bw(15) +
+  coord_flip() +
+  labs(x = "Diretor", y = "Nota média no IMDB")
+``` 
 
 ### Lucro
 
@@ -224,6 +254,23 @@ Column {.tabset}
 # boxplot
 # diretores com maiores lucros
 
+
+imdb_analise %>% 
+  filter(!is.na(diretor)) %>% 
+  group_by(diretor) %>% 
+  # summarise(
+  #   nota_media = mean(nota_imdb),
+  #   numero_de_filmes = n()
+  # ) %>% 
+  filter(n() > 10, retorno < 30) %>% 
+  ungroup() %>% 
+  #top_n(10, nota_media) %>% 
+  mutate(diretor = fct_reorder(diretor, retorno, .fun = median)) %>% 
+  ggplot(aes(x = diretor, y = retorno)) +
+  geom_boxplot() +
+  theme_bw(15) +
+  coord_flip() +
+  labs(x = "Diretor", y = "Retorno")
 ```
 
 Atores {data-orientation=columns}
@@ -238,6 +285,8 @@ O estúdio prefere um ator com certa experiência, que pode ser medida pelo núm
 
 ```{r}
 
+# vizualizacao dos atores com boas avaliações
+
 ```
 
 # Column
@@ -249,6 +298,9 @@ Sabemos que em geral os diretores possuem preferência por alguns atores. Por is
 listamos para cada diretor que consideramos anteriormente, o ator que mais trabalhou em conjunto.
 
 ```{r}
+
+# vizualizacao do ator que trabalhou mais vezes com cada diretor
+# pode ter só os 10 diretores com mais filmes
 
 ```
 
