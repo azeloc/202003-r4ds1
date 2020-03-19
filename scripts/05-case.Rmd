@@ -287,6 +287,32 @@ O estúdio prefere um ator com certa experiência, que pode ser medida pelo núm
 
 # vizualizacao dos atores com boas avaliações
 
+# imdb_analise %>% 
+#   gather(importancia, ator, ator_1, ator_2, ator_3) %>% 
+#   filter(nota_imdb > 7) %>% 
+#   count(ator) %>% 
+#   top_n(10, n) %>% 
+#   mutate(ator = fct_reorder(ator, n)) %>% 
+#   ggplot(aes(x = ator, y = n)) + 
+#   geom_col() +
+#   coord_flip() +
+#   theme_bw(20)
+
+imdb_analise %>% 
+  gather(importancia, ator, ator_1, ator_2, ator_3) %>% 
+  #filter(nota_imdb > 7) %>% 
+  group_by(ator) %>% 
+  summarise(
+    filmes_com_nota_alta = sum(nota_imdb > 7, na.rm = TRUE)
+  ) %>% 
+  top_n(10, filmes_com_nota_alta) %>% 
+  mutate(ator = fct_reorder(ator, filmes_com_nota_alta)) %>% 
+  ggplot(aes(x = ator, y = filmes_com_nota_alta)) + 
+  geom_col() +
+  coord_flip() +
+  theme_bw(20)
+  
+
 ```
 
 # Column
@@ -302,6 +328,14 @@ listamos para cada diretor que consideramos anteriormente, o ator que mais traba
 # vizualizacao do ator que trabalhou mais vezes com cada diretor
 # pode ter só os 10 diretores com mais filmes
 
+imdb_analise %>% 
+  group_by(diretor) %>% 
+  filter(n() > 12) %>% 
+  gather(importancia, ator, ator_1, ator_2, ator_3) %>% 
+  count(diretor, ator) %>% 
+  group_by(diretor) %>% 
+  filter(n == max(n)) %>% 
+  knitr::kable()
 ```
 
 
