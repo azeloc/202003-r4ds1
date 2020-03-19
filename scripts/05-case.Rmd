@@ -117,6 +117,13 @@ Row
 ```{r}
 imdb <- imdb %>% mutate(lucro = receita - orcamento)
 
+imdb_analise %>% 
+  filter(retorno < 100) %>% 
+  ggplot(aes(x = nota_imdb, y = retorno)) +
+  geom_point() +
+  theme_bw(20) +
+  labs(x = "Nota", y = "Retorno Financeiro")
+
 
 ```
 
@@ -126,6 +133,13 @@ Mas em geral filmes com notas bem altas lucram mais do que os outros.
 ### Relação entre o orçamento e lucro
 
 ```{r}
+
+imdb_analise %>% 
+  filter(retorno < 100) %>% 
+  ggplot(aes(x = orcamento, y = lucro)) +
+  geom_point() +
+  theme_bw(20) +
+  labs(x = "Orçamento", y = "Lucro")
 
 ```
 
@@ -143,6 +157,20 @@ Row
 ### Lucro por gênero
 
 ```{r}
+
+imdb_analise %>% 
+  group_by(generos) %>% 
+  # summarise(
+  #   lucro_medio = mean(lucro, na.rm = TRUE),
+  #   total_de_filmes = n()
+  # ) %>% 
+  filter(n() > 30) %>% 
+  ungroup() %>% 
+  mutate(generos = fct_reorder(generos, lucro, .fun = median)) %>% 
+  ggplot(aes(x = generos, y = lucro)) +
+  geom_boxplot() +
+  coord_flip() +
+  theme_bw(20)
 
 ```
 
@@ -172,6 +200,9 @@ Sabemos que o estúdio quer contratar um(a) diretor(a) experiente, para ter meno
 
 ```{r}
 
+#graficos de barras
+# grafico de diretor com mais filmes
+
 ```
 
 Column {.tabset}
@@ -181,11 +212,17 @@ Column {.tabset}
 
 ```{r fig.height=7}
 
+# geom_point
+# diretores com maiores médias de nota do imdb
+
 ```
 
 ### Lucro
 
 ```{r fig.height=7}
+
+# boxplot
+# diretores com maiores lucros
 
 ```
 
